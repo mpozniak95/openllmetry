@@ -182,6 +182,12 @@ class TracerWrapper(object):
                             print(Fore.RESET)
                         else:
                             instrument_set = True
+                    elif instrument == Instruments.REDIS:
+                        if not init_redis_instrumentor():
+                            print(Fore.RED + "Warning: Redis library does not exist.")
+                            print(Fore.RESET)
+                        else:
+                            instrument_set = True
                     elif instrument == Instruments.REQUESTS:
                         if not init_requests_instrumentor():
                             print(

@@ -427,6 +427,7 @@ def init_instrumentations(should_enrich_metrics: bool):
     init_cohere_instrumentor()
     init_pinecone_instrumentor()
     init_qdrant_instrumentor()
+    init_redis_instrumentor()
     init_chroma_instrumentor()
     init_haystack_instrumentor()
     init_langchain_instrumentor()
@@ -503,6 +504,18 @@ def init_qdrant_instrumentor():
         from opentelemetry.instrumentation.qdrant import QdrantInstrumentor
 
         instrumentor = QdrantInstrumentor(
+            exception_logger=lambda e: Telemetry().log_exception(e),
+        )
+        if not instrumentor.is_instrumented_by_opentelemetry:
+            instrumentor.instrument()
+
+
+def init_redis_instrumentor():
+    if importlib.util.find_spec("redis_client") is not None:
+        Telemetry().capture("instrumentation:redis:init")
+        from opentelemetry.instrumentation.redis import RedisInstrumentor
+
+        instrumentor = RedisInstrumentor(
             exception_logger=lambda e: Telemetry().log_exception(e),
         )
         if not instrumentor.is_instrumented_by_opentelemetry:

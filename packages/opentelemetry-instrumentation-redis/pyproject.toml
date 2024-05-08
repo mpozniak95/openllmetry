@@ -44,4 +44,4 @@ build-backend = "poetry.core.masonry.api"
 instruments = ["redis"]
 
 [tool.poetry.plugins."opentelemetry_instrumentor"]
-redis_client = "opentelemetry.instrumentation.qdrant:RedisInstrumentor"
+redis_client = "opentelemetry.instrumentation.redis:RedisInstrumentor"

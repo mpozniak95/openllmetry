@@ -38,4 +38,3 @@ def _wrap(tracer, to_wrap, wrapped, instance, args, kwargs):
         span.set_attribute(SpanAttributes.DB_SYSTEM, "redis")
         span.set_attribute(SpanAttributes.DB_OPERATION, to_wrap.get("method"))
         _set_span_attribute(span, "db.redis.search.test", 1)
-        _set_span_attribute(span, "db.redis.search.ids_count", count_or_none(kwargs.get("ids")))

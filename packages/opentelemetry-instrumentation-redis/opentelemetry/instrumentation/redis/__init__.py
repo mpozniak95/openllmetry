@@ -23,8 +23,8 @@ WRAPPED_METHODS = [
     {
         "package": redis,
         "object": "Redis",
-        "method": "pipeline",
-        "span_name": "redis.pipeline"
+        "method": "get_connection_kwargs",
+        "span_name": "redis.getconnectionkwargs"
     },
 ]
 
@@ -32,6 +32,7 @@ class RedisInstrumentor(BaseInstrumentor):
     """An instrumentor for Redis client library."""
 
     def __init__(self, exception_logger=None):
+        print("Redis instrumentor initialized")
         super().__init__()
         Config.exception_logger = exception_logger
 

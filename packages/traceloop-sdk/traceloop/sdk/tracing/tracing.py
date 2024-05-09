@@ -517,7 +517,7 @@ def init_qdrant_instrumentor():
 
 
 def init_redis_instrumentor():
-    if importlib.util.find_spec("redis_client") is not None:
+    if importlib.util.find_spec("redis") is not None:
         Telemetry().capture("instrumentation:redis:init")
         from opentelemetry.instrumentation.redis import RedisInstrumentor
 

@@ -122,6 +122,7 @@ class TracerWrapper(object):
                 init_instrumentations(should_enrich_metrics)
                 instrument_set = True
             else:
+                print(Fore.RED + f"Instruments: {instruments}" + Fore.RESET)
                 for instrument in instruments:
                     if instrument == Instruments.OPENAI:
                         if not init_openai_instrumentor(should_enrich_metrics):
@@ -181,6 +182,13 @@ class TracerWrapper(object):
                             )
                             print(Fore.RESET)
                         else:
+                            instrument_set = True
+                    elif instrument == Instruments.REDIS:
+                        if not init_redis_instrumentor():
+                            print(Fore.RED + "Warning: Redis library does not exist.")
+                            print(Fore.RESET)
+                        else:
+                            print(Fore.RED + "Redis initialized" + Fore.RESET)
                             instrument_set = True
                     elif instrument == Instruments.REQUESTS:
                         if not init_requests_instrumentor():
@@ -422,11 +430,13 @@ def init_tracer_provider(resource: Resource) -> TracerProvider:
 
 
 def init_instrumentations(should_enrich_metrics: bool):
+    print(Fore.RED + f"init_instrumentations tracing.py" + Fore.RESET)
     init_openai_instrumentor(should_enrich_metrics)
     init_anthropic_instrumentor(should_enrich_metrics)
     init_cohere_instrumentor()
     init_pinecone_instrumentor()
     init_qdrant_instrumentor()
+    init_redis_instrumentor()
     init_chroma_instrumentor()
     init_haystack_instrumentor()
     init_langchain_instrumentor()
@@ -509,6 +519,20 @@ def init_qdrant_instrumentor():
             instrumentor.instrument()
 
 
+def init_redis_instrumentor():
+    print(Fore.RED + f"Trying to initialize redis instrumentor" + Fore.RESET)
+    if importlib.util.find_spec("redis") is not None:
+        print(Fore.RED + "Initializing redis instrumentor" + Fore.RESET)
+        Telemetry().capture("instrumentation:redis:init")
+        from opentelemetry.instrumentation.redis import RedisInstrumentor
+
+        instrumentor = RedisInstrumentor(
+            exception_logger=lambda e: Telemetry().log_exception(e),
+        )
+        if not instrumentor.is_instrumented_by_opentelemetry:
+            instrumentor.instrument()
+
+
 def init_chroma_instrumentor():
     if importlib.util.find_spec("chromadb") is not None:
         Telemetry().capture("instrumentation:chromadb:init")
@@ -549,6 +573,7 @@ def init_langchain_instrumentor():
 
 
 def init_transformers_instrumentor():
+    print(Fore.RED + f"Init transformers instrumentor" + Fore.RESET)
     if importlib.util.find_spec("transformers") is not None:
         Telemetry().capture("instrumentation:transformers:init")
         from opentelemetry.instrumentation.transformers import TransformersInstrumentor

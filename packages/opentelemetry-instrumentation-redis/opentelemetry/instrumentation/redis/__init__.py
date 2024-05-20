@@ -2,7 +2,7 @@
 
 import logging
 import redis
-
+import redis.commands.search
 from typing import Collection
 from wrapt import wrap_function_wrapper
 
@@ -23,8 +23,26 @@ WRAPPED_METHODS = [
     {
         "package": redis,
         "object": "Redis",
+        "method": "ping",
+        "span_name": "redis.ping"
+    },
+    {
+        "package": redis,
+        "object": "Redis",
         "method": "get_connection_kwargs",
         "span_name": "redis.getconnectionkwargs"
+    },
+    {
+        "package": redis.commands.search,
+        "object": "Search",
+        "method": "create_index",
+        "span_name": "create_index",
+    },
+    {
+        "package": redis.commands.search,
+        "object": "Search",
+        "method": "search",
+        "span_name": "search",
     },
 ]
 
@@ -32,7 +50,7 @@ class RedisInstrumentor(BaseInstrumentor):
     """An instrumentor for Redis client library."""
 
     def __init__(self, exception_logger=None):
-        print("Redis instrumentor initialized")
+        print("Redis instrumentor initialized __init__")
         super().__init__()
         Config.exception_logger = exception_logger
 
@@ -40,6 +58,7 @@ class RedisInstrumentor(BaseInstrumentor):
         return _instruments
 
     def _instrument(self, **kwargs):
+        print("In redis _instrument")
         tracer_provider = kwargs.get("tracer_provider")
         tracer = get_tracer(__name__, __version__, tracer_provider)
         for wrapped_method in WRAPPED_METHODS:
@@ -54,6 +73,7 @@ class RedisInstrumentor(BaseInstrumentor):
                 )
 
     def _uninstrument(self, **kwargs):
+        print("In redis _uninstrument")
         for wrapped_method in WRAPPED_METHODS:
             wrap_package = wrapped_method.get("package")
             wrap_object = wrapped_method.get("object")

@@ -29,12 +29,17 @@ def count_or_none(obj):
 
 @_with_tracer_wrapper
 def _wrap(tracer, to_wrap, wrapped, instance, args, kwargs):
+    print("In redis _wrap")
     """Instruments and calls every function defined in TO_WRAP."""
     if context_api.get_value(_SUPPRESS_INSTRUMENTATION_KEY):
         return wrapped(*args, **kwargs)
     
     name = to_wrap.get("span_name")
     with tracer.start_as_current_span(name) as span:
+        print(f"Name of the span: {name}")
         span.set_attribute(SpanAttributes.DB_SYSTEM, "redis")
         span.set_attribute(SpanAttributes.DB_OPERATION, to_wrap.get("method"))
         _set_span_attribute(span, "db.redis.search.test", 1)
+        return_value = wrapped(*args, **kwargs)
+    print(f"Return value: {return_value}")
+    return return_value
